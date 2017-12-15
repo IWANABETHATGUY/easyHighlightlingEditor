@@ -9,7 +9,6 @@
 >Dfa.java c- 语言的词法分析器
 
 ![easyHightingExample](http://ouck2t8ui.bkt.clouddn.com/highLightingExample.gif)
-- [x] @mentions, #refs, [links](), **formatting**, and  supported
-- [x] list syntax required (any unordered or ordered list supported)
-- [x] this is a complete item
-- [ ] this is an incomplete item
+- [] 在文本插入字符时，只更新某一行的颜色，分情况如果是回车等按键，会改变整个文本的结构
+- [] 在文本粘贴和删除的时候，做相应的优化处理
+- [] 增加配置文件，让用户自定义颜色
