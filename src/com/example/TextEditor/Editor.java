@@ -1,6 +1,7 @@
 package com.example.TextEditor;
 
 import com.example.Dfa;
+import com.example.Main;
 import com.example.bean.Token;
 
 import javax.swing.*;
@@ -10,6 +11,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.List;
 
 public class Editor extends JFrame{
@@ -17,6 +19,7 @@ public class Editor extends JFrame{
     private Dfa dfa= new Dfa();
 
     public static void main(String[] args) {
+
         EventQueue.invokeLater(() -> {
             Editor eeee = new Editor();
 
@@ -30,21 +33,28 @@ public class Editor extends JFrame{
             // 颜色初始化
 
             JTextPane editor = new JTextPane();
+            StyledDocument m_doc = editor.getStyledDocument();
             editor.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyReleased(KeyEvent e) {
                     if (e.getKeyCode() == 123) {
                         String line = editor.getText();
                         eeee.dfa.setLine(line, 0, line.length());
+                        System.out.println(line.length());
                         eeee.Print(eeee.dfa.getAllToken());
                     }
                 }
             });
-            StyledDocument m_doc = editor.getStyledDocument();
+            editor.setFont(new Font("Dialog", Font.PLAIN, 20));
 
             editor.getDocument().addDocumentListener(new SyntaxHighlighter(editor));
 
-            frame.getContentPane().add(editor);
+            JScrollPane scrollPane = new JScrollPane(editor);
+            scrollPane.setVerticalScrollBarPolicy(
+                    javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+            frame.getContentPane().add(scrollPane);
+            frame.setResizable(true);
         });
     }
 
@@ -71,6 +81,8 @@ class SyntaxHighlighter implements DocumentListener {
 
     private SimpleAttributeSet KEYWORD = new SimpleAttributeSet();
 
+    private SimpleAttributeSet COMMENT = new SimpleAttributeSet();
+
     private Dfa dfa;
 
     private JEditorPane ed;
@@ -78,14 +90,38 @@ class SyntaxHighlighter implements DocumentListener {
     public SyntaxHighlighter(JTextPane editor) {
         // 准备着色使用的样式
         ed = editor;
+        Main main = new Main();
+        HashMap<String, String> map = main.parseXML("c_minus_config.xml");
+
+
         StyleConstants.setForeground(NORMAL, Color.black);
 
-        StyleConstants.setForeground(NUMBER, Color.green);
+        if (map.get("number") != null) {
+            StyleConstants.setForeground(NUMBER, Color.decode(map.get("number")));
+        } else {
+            StyleConstants.setForeground(NUMBER, Color.green);
+        }
 
-        StyleConstants.setForeground(KEYWORD, Color.red);
+        if (map.get("keyword") != null) {
+            StyleConstants.setForeground(KEYWORD, Color.decode(map.get("keyword")));
+        } else {
+            StyleConstants.setForeground(KEYWORD, Color.decode("#ff0000"));
+        }
         StyleConstants.setBold(KEYWORD, true);
 
-        StyleConstants.setForeground(ID, Color.blue);
+
+        if (map.get("id") != null) {
+            StyleConstants.setForeground(ID, Color.decode(map.get("id")));
+        } else {
+            StyleConstants.setForeground(ID, Color.blue);
+        }
+
+        if (map.get("comment") != null) {
+            StyleConstants.setForeground(COMMENT, Color.decode(map.get("comment")));
+        } else {
+            StyleConstants.setForeground(COMMENT, Color.decode("#cccccc"));
+        }
+
 
         dfa = new Dfa();
     }
@@ -113,6 +149,9 @@ class SyntaxHighlighter implements DocumentListener {
                 case "NUM":
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), NUMBER));
                     break;
+                case "COMMENT":
+                    SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), COMMENT));
+                    break;
                 default:
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), NORMAL));
                     break;
@@ -123,12 +162,12 @@ class SyntaxHighlighter implements DocumentListener {
 
     @Override
     public void changedUpdate(DocumentEvent e) {
-//        StyledDocument sd = (StyledDocument) e.getDocument();
-//        String line = ed.getText();
-//        dfa.setLine(line, 0, line.length());
-//        EventQueue.invokeLater(() -> {
-//            Print(dfa.getAllToken(), sd);
-//        });
+        StyledDocument sd = (StyledDocument) e.getDocument();
+        String line = ed.getText();
+        dfa.setLine(line, 0, line.length());
+        EventQueue.invokeLater(() -> {
+            Print(dfa.getAllToken(), sd);
+        });
 
 
     }
@@ -179,10 +218,13 @@ class SyntaxHighlighter implements DocumentListener {
         public void run() {
             try {
                 // 这里就是对字符进行着色
-                doc.setCharacterAttributes(pos, len, styleSet, true);
+                EventQueue.invokeLater(() -> {
+                    doc.setCharacterAttributes(pos, len, styleSet, false);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 }
+

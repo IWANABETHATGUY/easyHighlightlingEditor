@@ -11,7 +11,7 @@ import static com.example.Dfa.StateType.*;
 
 
 public class Dfa {
-    private int cursor = 0;
+    private int corsor = 0;
     private String Line = "";
     private int lineCount = 0;
     private int totalLen = 0;
@@ -50,12 +50,12 @@ public class Dfa {
 //        Set<Integer> set = new HashSet<>();
 //    }
     private void ungetNextChar() {
-        cursor--;
+        corsor--;
     }
 
     public void setLine(String line, int pos, int len) {
         Line = line;
-        cursor = pos;
+        corsor = pos;
         totalLen = pos + len;
         lineCount = 0;
     }
@@ -64,7 +64,7 @@ public class Dfa {
         List<Token> tokens = new ArrayList<>();
         if (!Line.equals("")) {
 
-            while (cursor < totalLen) {
+            while (corsor < totalLen) {
                 tokens.add(getToken(totalLen));
             }
         }
@@ -76,41 +76,71 @@ public class Dfa {
         boolean save;
         int startIndex = 0;
         Token token = null;
+        int commentThroughLine = 0;
         TokenType currentToken = null;
         StateType state = START;
-        while (state != DONE && cursor < len) {
-            char cur = Line.charAt(cursor++);
+        while (state != DONE && corsor < len) {
+            char cur = Line.charAt(corsor++);
             save = true;
             switch (state) {
                 case START:
-                    startIndex = cursor - 1 - lineCount;
-                    if ((TextUtil.isDigit(cur)))
+                    startIndex = corsor - 1 - lineCount;
+                    if ((TextUtil.isDigit(cur))) {
                         state = INNUM;
-                    else if (TextUtil.isLetter(cur))
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = NUM;
+                        }
+                    }
+
+                    else if (TextUtil.isLetter(cur)) {
                         state = INID;
-                    else if (cur == '<')
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = ID;
+                        }
+                    }
+
+                    else if (cur == '<') {
                         state = INLESS;
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = LE;
+                        }
+                    }
                     else if (cur == '\r') {
                         lineCount++;
                         save = false;
                     }
                     else if ((cur == ' ') || (cur == '\t') || (cur == '\n')) {
                         save = false;
-                        if (cursor == len) {
+                        if (corsor == len) {
                             state = DONE;
                         }
                     } else if (cur == '/') {
                         state = INDIVIDE;
-                        if (cursor == totalLen) {
+                        if (corsor == len) {
                             state = DONE;
                             currentToken = TIMES;
                         }
                     } else if (cur == '>') {
                         state = INGREAT;
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = GT;
+                        }
                     } else if (cur == '!') {
                         state = INNOTEQUEAL;
+                        if (corsor ==len) {
+                            state = DONE;
+                            currentToken = ERROR;
+                        }
                     } else if (cur == '=') {
                         state = INASSIGN;
+                        if (corsor ==len) {
+                            state = DONE;
+                            currentToken = EQ;
+                        }
                     } else {
                         state = DONE;
                         switch (cur) {
@@ -154,15 +184,20 @@ public class Dfa {
                     }
                     break;
                 case INDIVIDE:
-                    state = DONE;
                     if (cur == '*') {
                         state = INCOMMENT;
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = COMMENT;
+                        }
                     } else {
+                        state = DONE;
                         ungetNextChar();
                         save = false;
                         currentToken = TIMES;
                     }
                     break;
+
                 case INLESS:
                     state = DONE;
                     if (cur == '=') {
@@ -205,19 +240,22 @@ public class Dfa {
                     break;
                 case INNUM:
                     if (!TextUtil.isDigit(cur)) { /* backup in the input */
-
                         ungetNextChar();
                         save = false;
+                        state = DONE;
+                        currentToken = NUM;
+                    } else if (corsor == len) {
                         state = DONE;
                         currentToken = NUM;
                     }
                     break;
                 case INID:
-
                     if (!TextUtil.isLetter(cur)) {/* backup in the input */
-
                         ungetNextChar();
                         save = false;
+                        state = DONE;
+                        currentToken = ID;
+                    } else if (corsor == len) {
                         state = DONE;
                         currentToken = ID;
                     }
@@ -225,18 +263,30 @@ public class Dfa {
                 case INCOMMENT:
                     if (cur == '*') {
                         state = INECOMMENT;
+                        if (corsor == len) {
+                            state = DONE;
+                            currentToken = COMMENT;
+                        }
+                    } else if (cur == '\r'){
+                        commentThroughLine ++;
+                    }
+                    else if (corsor == len) {
+                        state = DONE;
+                        currentToken = COMMENT;
                     }
                     break;
                 case INECOMMENT:
                     if (cur == '/') {
                         state = START;
-                        save = false;
                         if (DISPLAY_COMMENT) {
-//                            printToken(COMMENT, result + '/');
+                            state = DONE;
+                            currentToken = COMMENT;
                         }
-                        result = "";
                     } else if (cur == '*') {
                         state = INECOMMENT;
+                    } else if(corsor == totalLen){
+                        state = DONE;
+                        currentToken = COMMENT;
                     } else {
                         state = INCOMMENT;
                     }
@@ -255,13 +305,17 @@ public class Dfa {
             if (state == DONE) {
 //                tokenMap.put(currentToken, result);
 //                printToken(currentToken, result);
-                if (currentToken == null) {
+                if (currentToken == null ) {
                     currentToken = ERROR;
                 }
                 if (currentToken == ID) {
                     currentToken = isKeyWrodToken(result);
                 }
+
                 int relen = result.length();
+                if (currentToken == COMMENT) {
+                    relen = relen - (commentThroughLine);
+                }
                 token = new Token(currentToken.toString(), result, relen, startIndex);
                 result = "";
             }
