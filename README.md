@@ -6,9 +6,11 @@
 >editor主要是gui的着色，以及事件绑定  
 >TextUtil.java 主要是一些常用的函数  
 >Token.java 是一个token实体  
->Dfa.java c- 语言的词法分析器
-
+>Lex.java c- 语言的词法分析器
+>Parser.java c- 语言的语法分析器
 ![easyHightingExample](http://ouck2t8ui.bkt.clouddn.com/highLightingExample.gif)
 - [ ] 在文本插入字符时，只更新某一行的颜色，分情况如果是回车等按键，会改变整个文本的结构
 - [ ] 在文本粘贴和删除的时候，做相应的优化处理
 - [x] 增加配置文件，让用户自定义颜色
+- [x] 添加语法分析功能
+- [ ] 自定义tab的长度。
