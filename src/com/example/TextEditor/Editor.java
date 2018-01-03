@@ -1,6 +1,6 @@
 package com.example.TextEditor;
 
-import com.example.Dfa;
+import com.example.Lex;
 import com.example.Main;
 import com.example.bean.Token;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Editor extends JFrame{
 
-    private Dfa dfa= new Dfa();
+    private Lex lex = new Lex();
 
     public static void main(String[] args) {
 
@@ -39,9 +39,9 @@ public class Editor extends JFrame{
                 public void keyReleased(KeyEvent e) {
                     if (e.getKeyCode() == 123) {
                         String line = editor.getText();
-                        eeee.dfa.setLine(line, 0, line.length());
+                        eeee.lex.setLine(line, 0, line.length());
                         System.out.println(line.length());
-                        eeee.Print(eeee.dfa.getAllToken());
+                        eeee.Print(eeee.lex.getAllToken());
                     }
                 }
             });
@@ -83,7 +83,7 @@ class SyntaxHighlighter implements DocumentListener {
 
     private SimpleAttributeSet COMMENT = new SimpleAttributeSet();
 
-    private Dfa dfa;
+    private Lex lex;
 
     private JEditorPane ed;
 
@@ -123,7 +123,7 @@ class SyntaxHighlighter implements DocumentListener {
         }
 
 
-        dfa = new Dfa();
+        lex = new Lex();
     }
 
 //    private void colouring(StyledDocument doc, int pos, int len) throws BadLocationException {
@@ -140,16 +140,16 @@ class SyntaxHighlighter implements DocumentListener {
                 continue;
             }
             switch (token.getType()) {
-                case "KEYWORD":
+                case KEYWORD:
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), KEYWORD));
                     break;
-                case "ID":
+                case ID:
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), ID));
                     break;
-                case "NUM":
+                case NUM:
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), NUMBER));
                     break;
-                case "COMMENT":
+                case COMMENT:
                     SwingUtilities.invokeLater(new ColouringTask(m_doc, token.getPos(), token.getLen(), COMMENT));
                     break;
                 default:
@@ -164,9 +164,9 @@ class SyntaxHighlighter implements DocumentListener {
     public void changedUpdate(DocumentEvent e) {
         StyledDocument sd = (StyledDocument) e.getDocument();
         String line = ed.getText();
-        dfa.setLine(line, 0, line.length());
+        lex.setLine(line, 0, line.length());
         EventQueue.invokeLater(() -> {
-            Print(dfa.getAllToken(), sd);
+            Print(lex.getAllToken(), sd);
         });
 
 
@@ -176,9 +176,9 @@ class SyntaxHighlighter implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
         StyledDocument sd = (StyledDocument) e.getDocument();
         String line = ed.getText();
-        dfa.setLine(line, 0, line.length());
+        lex.setLine(line, 0, line.length());
         EventQueue.invokeLater(() -> {
-            Print(dfa.getAllToken(), sd);
+            Print(lex.getAllToken(), sd);
         });
 
     }
@@ -189,9 +189,9 @@ class SyntaxHighlighter implements DocumentListener {
 
         StyledDocument sd = (StyledDocument) e.getDocument();
         String line = ed.getText();
-        dfa.setLine(line, 0, line.length());
+        lex.setLine(line, 0, line.length());
         EventQueue.invokeLater(() -> {
-            Print(dfa.getAllToken(), sd);
+            Print(lex.getAllToken(), sd);
         });
 
 

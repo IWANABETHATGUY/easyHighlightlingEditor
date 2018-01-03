@@ -1,9 +1,7 @@
 package com.example.bean;
 
-import com.example.Dfa;
-
 public class Token {
-    private String Type;
+    private TokenType Type;
     private String Content;
     private int len;
     private int pos;
@@ -18,19 +16,19 @@ public class Token {
                 '}';
     }
 
-    public Token(String type, String content, int len, int pos) {
+    public Token(TokenType type, String content, int len, int pos) {
         Type = type;
         Content = content;
         this.len = len;
         this.pos = pos;
     }
 
-    public String getType() {
+    public TokenType getType() {
 
         return Type;
     }
 
-    public void setType(String type) {
+    public void setType(TokenType type) {
         Type = type;
     }
 

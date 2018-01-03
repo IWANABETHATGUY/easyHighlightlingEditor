@@ -15,6 +15,7 @@ public class Main implements XmlDocument{
         main.parseXML("c_minus_config.xml");
     }
 
+
     @Override
     public HashMap<String, String> parseXML(String fileName) {
         HashMap<String, String> map = new HashMap();
@@ -34,12 +35,6 @@ public class Main implements XmlDocument{
             e.printStackTrace();
         }
 
-//        Set<Map.Entry<String, String>> entrySet = map.entrySet();
-//        Iterator iterator = entrySet.iterator();
-//        while (iterator.hasNext()) {
-//            Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next();
-//            System.out.println(entry.getKey() + ":" + entry.getValue());
-//        }
         return map;
     }
 }
